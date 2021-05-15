@@ -1,0 +1,10 @@
+---
+# vars file for cluster
+
+pkg_list:
+        - "docker"
+        - "iproute-tc"
+
+svc_list:
+        - "docker"
+        - "kubelet"

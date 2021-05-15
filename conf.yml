@@ -1,0 +1,21 @@
+- hosts: all
+  roles:
+          - cluster
+
+- hosts: masternode
+  tasks:
+          - name: Setting Up Flannel for Tunneling
+            shell: "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
+            become: false
+
+          - name: Getting join command
+            shell: "kubeadm token create --print-join-command"
+            register: join
+
+- hosts: slavenode
+  tasks:
+          - name: Executing Join Command
+            command: "{{ hostvars[item]['join']['stdout'] }}"
+            with_items: "{{ groups['masternode'] }}"
+            ignore_errors: yes
+
