@@ -4,7 +4,7 @@
 - name: K8s Master Node creation
   ec2_instance:
           name: "K8s-Masternode"
-          profile: aditya
+          profile: "{{ aws_profile }}"
           security_group: "{{ sg }}"
           key_name: "{{ key }}"
           instance_type: "{{ type }}"
@@ -25,7 +25,7 @@
   ec2_instance:
           name: "K8s-SlaveNode 1"
           security_group: "{{ sg }}"
-          profile: aditya
+          profile: "{{ aws_profile }}"
           key_name: "{{ key }}"
           instance_type: "{{ type }}"
           image_id: "{{ image }}"
@@ -45,7 +45,7 @@
 - name: K8s Worker Node2 creation
   ec2_instance:
           name: "K8s-SlaveNode 2"
-          profile: aditya
+          profile: "{{ aws_profile }}"
           security_group: "{{ sg }}"
           key_name: "{{ key }}"
           instance_type: "{{ type }}"

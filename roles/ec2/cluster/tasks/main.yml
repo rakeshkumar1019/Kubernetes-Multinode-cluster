@@ -1,0 +1,77 @@
+---
+# tasks file for setting up K8s cluster
+
+- name: Install Docker
+  package:
+          name: "{{ item }}"
+          state: present
+  loop: "{{ pkg_list }}"
+
+- name: Kubernetes Yum repository setup
+  copy:
+          src: "kubernetes.repo"
+          dest: "/etc/yum.repos.d/kubernetes.repo"
+
+- name: Install Kubeadm, Kubelet, Kubectl
+  command:
+          cmd: "yum install kubeadm kubectl kubelet --disableexcludes=kubernetes -y"
+          warn: no
+
+- name: Starting Services
+  service:
+          name: "{{ item }}"
+          state: restarted
+          enabled: yes
+  loop: "{{ svc_list }}"
+
+- name: Changing Docker daemon to systemd
+  copy:
+          src: daemon.json
+          dest: "/etc/docker/daemon.json"
+
+- name: Restart Docker Service
+  service:
+          name: "docker"
+          state: restarted
+
+- name: Kubernetes Configuration file
+  copy:
+          src: "k8s.conf"
+          dest: "/etc/sysctl.d/k8s.conf"
+
+- name: Restart System services
+  command:
+          cmd: "sysctl --system"
+          warn: no
+
+- name: Pulling required K8s Images
+  command:
+          cmd: "kubeadm config images pull"
+          warn: no
+  when: inventory_hostname in groups['masternode']
+
+- name: Starting K8s master
+  command:
+          cmd: "kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem"
+          warn: no
+  ignore_errors: yes
+  when: inventory_hostname in groups['masternode']
+
+- name: Copying script
+  copy:
+          src: "kube_script.sh"
+          dest: "./"
+  when: inventory_hostname in groups['masternode']
+
+- name: Making script executable
+  command:
+          cmd: "sudo chmod +x ~/kube_script.sh"
+  become: false             
+  when: inventory_hostname in groups['masternode']
+
+- name: Executing Script
+  command:
+          cmd: "sh ~/kube_script.sh"
+          warn: no
+  become: false
+  when: inventory_hostname in groups['masternode']
