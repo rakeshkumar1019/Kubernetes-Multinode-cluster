@@ -3,7 +3,7 @@
 image: "ami-010aff33ed5991201"
 type: "t2.micro"
 sg: "sg-02a140eb95ffc2389"
-key: "adi_key_march"
+key: "Global"
 subnet: "subnet-611c1509"
 region: "ap-south-1"
 count: 2
